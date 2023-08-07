@@ -19,7 +19,7 @@ LineExtractionROS::LineExtractionROS(ros::NodeHandle& nh, ros::NodeHandle& nh_lo
   scan_subscriber_ = nh_.subscribe(scan_topic_, 1, &LineExtractionROS::laserScanCallback, this);
   if (pub_markers_)
   {
-    marker_publisher_ = nh_.advertise<visualization_msgs::Marker>("line_markers", 1);
+    marker_publisher_ = nh_.advertise<visualization_msgs::MarkerArray>("line_markers", 1);
   }
 }
 
@@ -46,9 +46,9 @@ void LineExtractionROS::run()
   // Also publish markers if parameter publish_markers is set to true
   if (pub_markers_)
   {
-    visualization_msgs::Marker marker_msg;
-    populateMarkerMsg(lines, marker_msg);
-    marker_publisher_.publish(marker_msg);
+    visualization_msgs::MarkerArray marker_arr;
+    populateMarkerMsg(lines, marker_arr);
+    marker_publisher_.publish(marker_arr);
   }
 }
 
@@ -152,18 +152,20 @@ void LineExtractionROS::populateLineSegListMsg(const std::vector<Line> &lines,
 }
 
 void LineExtractionROS::populateMarkerMsg(const std::vector<Line> &lines, 
-                                           visualization_msgs::Marker &marker_msg)
+                                           visualization_msgs::MarkerArray &marker_arr)
 {
-  marker_msg.ns = "line_extraction";
-  marker_msg.id = 0;
-  marker_msg.type = visualization_msgs::Marker::LINE_LIST;
-  marker_msg.scale.x = 0.1;
-  marker_msg.color.r = 1.0;
-  marker_msg.color.g = 0.0;
-  marker_msg.color.b = 0.0;
-  marker_msg.color.a = 1.0;
-  for (std::vector<Line>::const_iterator cit = lines.begin(); cit != lines.end(); ++cit)
+  int id = 0;
+  for (std::vector<Line>::const_iterator cit = lines.begin(); cit != lines.end(); ++cit, id++)
   {
+    visualization_msgs::Marker marker_msg;
+    marker_msg.ns = "line_extraction";
+    marker_msg.id = id;
+    marker_msg.type = visualization_msgs::Marker::LINE_LIST;
+    marker_msg.scale.x = 0.1;
+    marker_msg.color.r = 1.0;
+    marker_msg.color.g = 0.5;
+    marker_msg.color.b = 0.7;
+    marker_msg.color.a = 1.0;
     geometry_msgs::Point p_start;
     p_start.x = cit->getStart()[0];
     p_start.y = cit->getStart()[1];
@@ -174,9 +176,11 @@ void LineExtractionROS::populateMarkerMsg(const std::vector<Line> &lines,
     p_end.y = cit->getEnd()[1];
     p_end.z = 0;
     marker_msg.points.push_back(p_end);
+    //marker_msg.pose.orientation = theta_to_quat(cit->getAngle());
+    marker_msg.header.frame_id = frame_id_;
+    marker_msg.header.stamp = ros::Time::now();
+    marker_arr.markers.push_back(marker_msg);
   }
-  marker_msg.header.frame_id = frame_id_;
-  marker_msg.header.stamp = ros::Time::now();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
