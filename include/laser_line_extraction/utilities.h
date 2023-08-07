@@ -60,7 +60,7 @@ inline double pi_to_pi(double angle)
   return angle;
 }
 
-inline geometry_msgs::Quaternion theta_to_quat(const double angle)
+/*inline geometry_msgs::Quaternion theta_to_quat(const double angle)
 {
   geometry_msgs::Quaternion q;
   q.x = 0.0;
@@ -68,7 +68,7 @@ inline geometry_msgs::Quaternion theta_to_quat(const double angle)
   q.z = sin(angle/2);
   q.w = cos(angle/2);
   return q;
-}
+}*/
 
 inline std::vector<double> polar_to_cartesian(boost::array<double, 2> &start_pt,
                                               boost::array<double, 2> &end_pt,
